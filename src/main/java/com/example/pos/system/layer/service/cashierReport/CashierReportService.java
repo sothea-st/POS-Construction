@@ -113,7 +113,7 @@ public class CashierReportService {
 
         sumExchangeUSD = JavaConstant.getTwoPrecision(sumExchangeUSD);
 
-        cashierCount = cashierCount - sumExchangeUSD;
+        //cashierCount = cashierCount - sumExchangeUSD;
 
         map.put("closeCash", 1);
         map.put("cashierCount", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(cashierCount))));
