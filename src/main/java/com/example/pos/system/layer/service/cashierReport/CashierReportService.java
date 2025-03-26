@@ -94,7 +94,7 @@ public class CashierReportService {
                 closeShift.getKhqrAba().doubleValue() +
                 closeShift.getCreditCard().doubleValue() +
                 closeShift.getCashUsd().doubleValue() +
-                closeShift.getCashKhr().doubleValue() / JavaConstant.exchangeRate;
+                JavaConstant.getTwoPrecision(closeShift.getCashKhr().doubleValue() / JavaConstant.exchangeRate);
 
 
         List<ExchangeProjection> exchanges = repoSale.getExchange(userCode,posId);
@@ -116,7 +116,7 @@ public class CashierReportService {
         cashierCount = cashierCount - sumExchangeUSD;
 
         map.put("closeCash", 1);
-        map.put("cashierCount", BigDecimal.valueOf(Double.valueOf(df.format(cashierCount))));
+        map.put("cashierCount", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(cashierCount))));
         map.put("closeDate", closeShift.getCloseTime());
 
         // Sale summery
@@ -150,7 +150,7 @@ public class CashierReportService {
         data.add(new VatProductModel("VAT Taxable Value", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(subTotal)))));
         data.add(new VatProductModel("Non-VAT Taxable Value", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(noneVat)))));
         data.add(new VatProductModel("VAT State Charge Value",
-                BigDecimal.valueOf(Double.valueOf(df.format(vatStateChrge)))));
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(vatStateChrge)))));
         data.add(new VatProductModel("Public Lighting Tax Base", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(plt)))));
         map.put("SummeryAllProVat", data);
     }
@@ -200,7 +200,7 @@ public class CashierReportService {
 
             if (disQty > 0) {
                 discount.add(new SummeryCashierReport(listDiscount.get(i) + "%", disQty,
-                        BigDecimal.valueOf(Double.valueOf(df.format(disAmount)))));
+                        BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(disAmount)))));
             }
 
         }
@@ -218,7 +218,7 @@ public class CashierReportService {
 
         HashMap<String, Object> discountDollar = new HashMap<>();
         discountDollar.put("qtySaledDollar", _disQtyDollar);
-        discountDollar.put("amountSaledDollar", BigDecimal.valueOf(Double.valueOf(df.format(_saledDollar))));
+        discountDollar.put("amountSaledDollar", BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_saledDollar))));
 
         HashMap<String, Object> _map = new HashMap<>();
         _map.put("percentag", discount);
@@ -255,6 +255,7 @@ public class CashierReportService {
         for( DiscountProjection d : _cashKhr ) {
             Integer _qty = d.getQty() - d.getQty_returned();
             Double _price = d.getPrice() * _qty;
+
             if( d.getDiscount_type() != null )  {
                 if( d.getDiscount_type().equals("dollar") ) {
                     _calculateCashKhr += _price - d.getDiscount()*_qty; 
@@ -290,19 +291,25 @@ public class CashierReportService {
 
         ArrayList<SummeryCashierReport> payment = new ArrayList<>();
 
+
+
+        String _cash_riel = JavaRoundUp.setRoundNumber(_calculateCashKhr * JavaConstant.exchangeRate);
+
+        Double _convert_cash_riel_to_usd = Double.valueOf(_cash_riel.replace(",",""));
+
         payment.add(new SummeryCashierReport(
-                "Cash-Riels " + JavaRoundUp.setRoundNumber(_calculateCashKhr * JavaConstant.exchangeRate) + "", qtyKhr.size(),
-                BigDecimal.valueOf(Double.valueOf(df.format(_calculateCashKhr)))));
+                "Cash-Riels " +  _cash_riel, qtyKhr.size(),
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_convert_cash_riel_to_usd/JavaConstant.exchangeRate)))));
 
 
         payment.add(new SummeryCashierReport("Cash- Dollars", qtyUsd.size(),
-                BigDecimal.valueOf(Double.valueOf(df.format(_calculateCashUsd)))));
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_calculateCashUsd)))));
         payment.add(new SummeryCashierReport("MNK QR Pay", qtyMnk,
-                BigDecimal.valueOf(Double.valueOf(df.format(_cashMnk)))));
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_cashMnk)))));
         payment.add(new SummeryCashierReport("ABA QR Pay", qtyAba,
-                BigDecimal.valueOf(Double.valueOf(df.format(_cashAba)))));
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_cashAba)))));
         payment.add(new SummeryCashierReport("ABA-Card Payment", qtyCredit,
-                BigDecimal.valueOf(Double.valueOf(df.format(_cashCredit)))));
+                BigDecimal.valueOf(Double.valueOf(JavaConstant.getTwoPrecision(_cashCredit)))));
 
         map.put("summeryPayemnt", payment);
     }

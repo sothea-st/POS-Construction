@@ -559,7 +559,7 @@ public class RouteController {
 
           @PostMapping
           public ResponseEntity<?> addReason(@Valid @RequestBody Reason reason) {
-               System.out.println("1111111111111111111 = " + reason.getCreateBy());
+
                Reason data = service.addReason(reason);
                return JavaResponse.success(data);
           }
